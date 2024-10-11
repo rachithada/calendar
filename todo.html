@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List for Day</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>To-Do List for Day <span id="day-title"></span></h1>
+    <ul id="todo-list"></ul>
+    <input type="text" id="new-task" placeholder="Add a new task">
+    <button id="add-task-btn">Add Task</button>
+
+    <script>
+        // Get the day from the URL query string
+        const urlParams = new URLSearchParams(window.location.search);
+        const dayIndex = urlParams.get('day');
+
+        // Set the day title
+        document.getElementById('day-title').textContent = parseInt(dayIndex) + 1;
+
+        // Load tasks from localStorage
+        function loadTasks() {
+            const todoList = JSON.parse(localStorage.getItem('todoList')) || {};
+            return todoList[dayIndex] || [];
+        }
+
+        // Save tasks to localStorage
+        function saveTasks(tasks) {
+            const todoList = JSON.parse(localStorage.getItem('todoList')) || {};
+            todoList[dayIndex] = tasks;
+            localStorage.setItem('todoList', JSON.stringify(todoList));
+        }
+
+        // Function to render the tasks
+        function renderTasks() {
+            const tasks = loadTasks();
+            const todoListElement = document.getElementById('todo-list');
+            todoListElement.innerHTML = '';  // Clear the existing list
+
+            tasks.forEach((task, index) => {
+                const listItem = document.createElement('li');
+                listItem.textContent = task;
+
+                // Add a delete button for each task
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Delete';
+                deleteButton.addEventListener('click', () => {
+                    tasks.splice(index, 1);
+                    saveTasks(tasks);
+                    renderTasks();  // Re-render after deletion
+                });
+
+                listItem.appendChild(deleteButton);
+                todoListElement.appendChild(listItem);
+            });
+        }
+
+        // Add a new task
+        document.getElementById('add-task-btn').addEventListener('click', () => {
+            const newTaskInput = document.getElementById('new-task');
+            const newTask = newTaskInput.value.trim();
+
+            if (newTask) {
+                const tasks = loadTasks();
+                tasks.push(newTask);
+                saveTasks(tasks);
+                newTaskInput.value = '';  // Clear the input field
+                renderTasks();  // Re-render the list
+            }
+        });
+
+        // Initial render of tasks
+        renderTasks();
+    </script>
+</body>
+</html>

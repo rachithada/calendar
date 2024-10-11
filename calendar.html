@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>82 Days Countdown with To-Do Tasks</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>82 Days Countdown for 2024</h1>
+    <div class="container">
+        <!-- JavaScript will generate the blocks -->
+    </div>
+
+    <script>
+        const totalDays = 82;
+        const today = new Date();
+        const container = document.querySelector('.container');
+
+        // Function to mark a day as done in localStorage
+        function markDayAsDone(index) {
+            const markedDays = JSON.parse(localStorage.getItem('markedDays')) || [];
+            if (!markedDays.includes(index)) {
+                markedDays.push(index);
+                localStorage.setItem('markedDays', JSON.stringify(markedDays));
+            }
+        }
+
+        // Function to unmark a day in localStorage
+        function unmarkDay(index) {
+            let markedDays = JSON.parse(localStorage.getItem('markedDays')) || [];
+            markedDays = markedDays.filter(day => day !== index);
+            localStorage.setItem('markedDays', JSON.stringify(markedDays));
+        }
+
+        // Function to check if a day is already marked as done
+        function isDayMarked(index) {
+            const markedDays = JSON.parse(localStorage.getItem('markedDays')) || [];
+            return markedDays.includes(index);
+        }
+
+        // Loop through the remaining days
+        for (let i = 0; i < totalDays; i++) {
+            const block = document.createElement('div');
+            block.classList.add('block');
+
+            // Calculate the date for each block
+            const futureDate = new Date();
+            futureDate.setDate(today.getDate() + i);
+
+            // Format date as Day and Date
+            const options = { weekday: 'long', month: 'long', day: 'numeric' };
+            const formattedDate = futureDate.toLocaleDateString(undefined, options);
+
+            block.innerHTML = `
+                <span>${formattedDate}</span>
+                <button class="mark">${isDayMarked(i) ? 'Unmark' : 'Mark as Done'}</button>
+                <button class="todo-btn">To-Do</button>
+            `;
+
+            // Check if the day is already marked and update the UI
+            if (isDayMarked(i)) {
+                block.classList.add('completed');
+            }
+
+            // Add event listener to toggle mark/unmark
+            block.querySelector('.mark').addEventListener('click', function() {
+                if (isDayMarked(i)) {
+                    block.classList.remove('completed');
+                    this.textContent = 'Mark as Done';
+                    unmarkDay(i);  // Unmark the day
+                } else {
+                    block.classList.add('completed');
+                    this.textContent = 'Unmark';
+                    markDayAsDone(i);  // Mark the day
+                }
+            });
+
+            // Add event listener for the to-do button to open a new page
+            block.querySelector('.todo-btn').addEventListener('click', function() {
+                const dayIndex = i;
+                const toDoWindow = window.open(`todo.html?day=${dayIndex}`, '_blank');
+            });
+
+            // Append block to container
+            container.appendChild(block);
+        }
+    </script>
+</body>
+</html>
